@@ -23,7 +23,8 @@ def build_app() -> MainMenu:
     order_factory = OrderFactory(FieldValidator())
     incident_factory = IncidentFactory(FieldValidator())
     order_service = OrderService(order_queue, dispatched, order_factory)
-    incident_service = IncidentService(incident_stack, dispatched, processed, incident_factory)
+    incident_service = IncidentService(incident_stack, order_queue, dispatched,
+                                       processed, incident_factory)
     return MainMenu(order_service, incident_service)
 
 

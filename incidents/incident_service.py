@@ -1,12 +1,14 @@
 from collections.abc import Iterable, Iterator
 from typing import Optional
 
+from data_structures.queue_linked_list import QueueLinkedList
 from data_structures.stack_linked_list import StackLinkedList
 from incidents.incident_builder import IncidentBuilder
 from incidents.incident_factory import IncidentFactory
 from models.enums import IncidentStatus, IncidentType, OrderStatus
 from models.incident import Incident
 from models.operation_result import OperationResult
+from models.order import Order
 from validators.field_validator import rule_required
 
 
@@ -14,10 +16,12 @@ class IncidentService:
     """Reglas de negocio de incidencias con pila e histórico."""
 
     # O(1): guarda referencias inyectadas desde build_app().
-    def __init__(self, stack: StackLinkedList, dispatched: dict,
-                 processed: dict, factory: IncidentFactory) -> None:
-        """Recibe pila, históricos y factory."""
+    def __init__(self, stack: StackLinkedList, queue: QueueLinkedList,
+                 dispatched: dict, processed: dict,
+                 factory: IncidentFactory) -> None:
+        """Recibe pila, cola de pedidos, históricos y factory."""
         self._stack = stack
+        self._queue = queue
         self._dispatched = dispatched
         self._processed = processed
         self._factory = factory
@@ -31,7 +35,18 @@ class IncidentService:
                 return True
         return False
 
-    # O(n): n = longitud del Order ID; recorre el texto validando prefijo y dígitos.
+    # O(n): n = pedidos en cola; histórico en O(1) y barrido de los n pendientes.
+    def _find_order(self, order_id: str) -> Order | None:
+        """Busca el pedido en el histórico de despachos o en la cola pendiente."""
+        order = self._dispatched.get(order_id)
+        if order is not None:
+            return order
+        for pending in self._queue.traverse_forward():
+            if pending.order_id == order_id:
+                return pending
+        return None
+
+    # O(n): n = pedidos en cola; valida el texto y confirma que el pedido exista.
     def _normalize_order_input(self, order_id: str) -> str | None:
         """Acepta 'Order-0001', 'order-1', '0001', '1' y '-0001' si existe el pedido."""
         if not isinstance(order_id, str):
@@ -51,7 +66,7 @@ class IncidentService:
             candidate = f"Order-{int(digits):04d}"
         except ValueError:
             return order_id
-        if with_dash and candidate not in self._dispatched:
+        if with_dash and self._find_order(candidate) is None:
             return order_id
         return candidate
 
@@ -68,7 +83,7 @@ class IncidentService:
                     return key
         return cleaned
 
-    # O(n): valida 3 campos, resuelve el pedido y recorre las n incidencias de la pila.
+    # O(n): valida 3 campos, localiza el pedido y recorre las n incidencias de la pila.
     def register_incident(self, tipo: str, order_id: str, motivo: str) -> OperationResult:
         """Registra una incidencia en la pila sin consumir IDs si falla."""
         error = rule_required(tipo, "Tipo")
@@ -81,7 +96,7 @@ class IncidentService:
         if error:
             return OperationResult.failure(error)
         key = self._resolve_order_key(order_id)
-        order = self._dispatched.get(key) if key is not None else None
+        order = self._find_order(key) if key is not None else None
         if order is None:
             shown = order_id.strip() if isinstance(order_id, str) else order_id
             return OperationResult.failure(
