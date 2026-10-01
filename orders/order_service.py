@@ -21,30 +21,9 @@ class OrderService:
         self._factory = factory
         self.last_dispatched_order_id: str | None = None
 
-    # O(n): n = pedidos registrados; recorre cola e histórico buscando ese cliente.
-    def _find_same_client(self, nombre: str, apellido: str) -> bool:
-        """Indica si ya existe un pedido con ese mismo nombre y apellido."""
-        if not isinstance(nombre, str) or not isinstance(apellido, str):
-            return False
-        target = (nombre.strip().lower(), apellido.strip().lower())
-        for order in self._queue.traverse_forward():
-            key = (order.nombre.strip().lower(), order.apellido.strip().lower())
-            if key == target:
-                return True
-        for order in self._dispatched.values():
-            key = (order.nombre.strip().lower(), order.apellido.strip().lower())
-            if key == target:
-                return True
-        return False
-
-    # O(n): n = pedidos registrados; descarta el cliente repetido y delega en la Factory.
+    # O(n): n = longitud de nombre y apellido; la Factory valida sus n caracteres.
     def register_order(self, nombre: str, apellido: str, cajas: int) -> OperationResult:
-        """Registra y encola un pedido si el cliente no está repetido."""
-        if self._find_same_client(nombre, apellido):
-            shown = f"{nombre.strip()} {apellido.strip()}"
-            return OperationResult.failure(
-                f"Ya existe un pedido con el mismo nombre y apellido: {shown}."
-            )
+        """Registra y encola un pedido."""
         builder = OrderBuilder(self._factory)
         result = builder.with_nombre(nombre).with_apellido(apellido).with_cajas(cajas).build()
         if not result.ok:
