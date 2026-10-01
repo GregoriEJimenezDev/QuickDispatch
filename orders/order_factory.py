@@ -19,7 +19,6 @@ class OrderFactory:
     # O(1): emite un ID inédito; repite si el candidato ya está en el set.
     def _issue_id(self) -> str:
         """Emite un ID único que nunca se reutiliza."""
-        """Emite un ID único que nunca se reutiliza."""
         self._counter += 1
         new_id = f"Order-{self._counter:04d}"
         while new_id in self._issued:

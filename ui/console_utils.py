@@ -121,14 +121,20 @@ def read_text(prompt: str) -> str:
     return text
 
 
-# O(n) por intento: n = longitud del texto; valida largo <= 9 ANTES de int().
+# O(n) por intento: n = longitud del texto; separa no numéricos, tope y entero.
 def read_positive_int(prompt: str) -> int:
     """Lee un entero mayor que 0 de hasta 9 dígitos, repitiendo si hace falta."""
     base = " " * margin() + "  " + prompt + " "
     while True:
         text = input(base).strip()
         show("")
-        if 0 < len(text) <= 9 and text.isdecimal() and int(text) > 0:
+        if not text.isdecimal():
+            show(centered("[ERROR] Solo se permiten números enteros mayores que 0."))
+            continue
+        if len(text) > 9:
+            show(centered("[ERROR] Ingrese un entero mayor que 0 de hasta 9 dígitos."))
+            continue
+        if int(text) > 0:
             return int(text)
         show(centered("[ERROR] Solo se permiten números enteros mayores que 0."))
 

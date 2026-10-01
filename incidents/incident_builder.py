@@ -1,16 +1,19 @@
+from types import MappingProxyType
+from typing import Mapping
+
 from incidents.incident_factory import IncidentFactory
 from models.enums import IncidentType
 from models.operation_result import OperationResult
 
 
-TYPE_ALIASES = {
-    "DEVOLUCION": IncidentType.DEVOLUCION.value,
-    "CANCELACION": IncidentType.CANCELACION.value,
-}
-
-
 class IncidentBuilder:
     """Arma incidencias paso a paso con métodos encadenables."""
+
+    # O(1): alias sin tilde -> texto oficial, en vista de solo lectura.
+    TYPE_ALIASES: Mapping[str, str] = MappingProxyType({
+        "DEVOLUCION": IncidentType.DEVOLUCION.value,
+        "CANCELACION": IncidentType.CANCELACION.value,
+    })
 
     # O(1): guarda referencia a la factory inyectada (DIP).
     def __init__(self, factory: IncidentFactory) -> None:
@@ -24,7 +27,8 @@ class IncidentBuilder:
     def with_tipo(self, tipo: str) -> "IncidentBuilder":
         """Normaliza y guarda el tipo."""
         text = tipo.strip().upper() if isinstance(tipo, str) else tipo
-        self._tipo = TYPE_ALIASES.get(text, text) if isinstance(text, str) else text
+        self._tipo = (IncidentBuilder.TYPE_ALIASES.get(text, text)
+                      if isinstance(text, str) else text)
         return self
 
     # O(n): recorta los n caracteres del Order ID (la clave la resuelve el service).

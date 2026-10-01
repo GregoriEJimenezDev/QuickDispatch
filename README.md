@@ -13,8 +13,24 @@ python main.py
 
 Requiere Python 3.10 o superior (se usa `X | None` en anotaciones).
 
+La cantidad de cajas se pide como entero mayor que 0 y admite **hasta 9 dígitos**;
+si el texto no es numérico, es cero o supera ese tope, la interfaz vuelve a
+pedirlo con un mensaje propio para cada caso.
+
 La interfaz usa una columna centrada de 100 caracteres (se adapta al ancho de la
 terminal con un mínimo de 40); conviene maximizar o ajustar la ventana antes de ejecutar.
+
+## Pruebas
+
+```bash
+cd QuickDispatch
+python -m unittest discover -v
+```
+
+`tests/` contiene pruebas automáticas con `unittest` (biblioteca estándar, sin
+dependencias): cola FIFO y pila LIFO, registro y despacho de pedidos, registro y
+procesamiento de incidencias, y flujos completos de la interfaz por stdin
+(salida limpia, EOF, mensajes de validación y despacho en orden FIFO).
 
 ## Estructura de carpetas
 
@@ -25,6 +41,7 @@ terminal con un mínimo de 40); conviene maximizar o ajustar la ventana antes de
 - `orders/` e `incidents/`: factories, builders y servicios de cada flujo.
 - `validators/`: reglas de validación inyectables.
 - `ui/`: utilidades de consola y menú principal de 6 opciones.
+- `tests/`: pruebas automáticas con `unittest` (cola, pila, pedidos, incidencias y CLI).
 - `requirements.txt`: nota de versión mínima de Python (sin dependencias).
 
 ## Complejidades por operación
