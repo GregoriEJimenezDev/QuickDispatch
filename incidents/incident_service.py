@@ -33,17 +33,27 @@ class IncidentService:
 
     # O(n): n = longitud del Order ID; recorre el texto validando prefijo y dígitos.
     def _normalize_order_input(self, order_id: str) -> str | None:
-        """Acepta 'Order-0001', 'order-1', '0001' o '1'; el resto vuelve igual."""
+        """Acepta 'Order-0001', 'order-1', '0001', '1' y '-0001' si existe el pedido."""
         if not isinstance(order_id, str):
             return None
         text = order_id.strip()
-        digits = text[6:] if text.lower().startswith("order-") else text
+        lower = text.lower()
+        with_dash = not lower.startswith("order-") and text.startswith("-")
+        if lower.startswith("order-"):
+            digits = text[6:]
+        elif with_dash:
+            digits = text[1:]
+        else:
+            digits = text
         if not digits.isdecimal():
             return order_id
         try:
-            return f"Order-{int(digits):04d}"
+            candidate = f"Order-{int(digits):04d}"
         except ValueError:
             return order_id
+        if with_dash and candidate not in self._dispatched:
+            return order_id
+        return candidate
 
     # O(n): n = claves del histórico; consulta exacta O(1) y barrido de las n claves.
     def _resolve_order_key(self, order_id: str) -> str | None:
