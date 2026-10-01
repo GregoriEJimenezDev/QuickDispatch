@@ -1,5 +1,6 @@
 import re
 from collections.abc import Iterable, Iterator
+from typing import Optional
 
 from data_structures.stack_linked_list import StackLinkedList
 from incidents.incident_builder import IncidentBuilder
@@ -23,10 +24,11 @@ class IncidentService:
         self._dispatched = dispatched
         self._processed = processed
         self._factory = factory
-        self.last_processed_incident_id = None
+        self.last_processed_incident_id: str | None = None
 
     # O(n): un solo recorrido de la pila para detectar duplicado pendiente (sin nativas).
     def _has_pending_for_order(self, order_id: str) -> bool:
+        """Indica si el pedido ya tiene una incidencia pendiente."""
         for incident in self._stack.traverse_from_top():
             if incident.order_id == order_id:
                 return True
@@ -34,6 +36,7 @@ class IncidentService:
 
     # O(m): normaliza ("1"/"0001"/"Order-0001" -> "Order-0001"; None si formato invalido).
     def _normalize_order_input(self, order_id: str) -> str | None:
+        """Normaliza el Order ID a formato Order-NNNN o devuelve None."""
         if not isinstance(order_id, str):
             return None
         match = _ORDER_ID_RE.match(order_id.strip())
@@ -46,6 +49,7 @@ class IncidentService:
 
     # O(n): clave canonica del pedido (exacta O(1); barrido O(n) si varia mayusculas).
     def _resolve_order_key(self, order_id: str) -> str | None:
+        """Busca la clave canónica del pedido en despachados."""
         cleaned = self._normalize_order_input(order_id)
         if isinstance(cleaned, str) and cleaned in self._dispatched:
             return cleaned
@@ -91,9 +95,9 @@ class IncidentService:
     # O(1): pop + guardado en dict nativo, sin recorridos.
     def process_incident(self) -> OperationResult:
         """Procesa la cima de la pila y cierra el pedido."""
-        if self._stack.is_empty():
+        incident: Optional[Incident] = self._stack.pop()
+        if incident is None:
             return OperationResult.failure("No hay incidencias pendientes por procesar.")
-        incident: Incident = self._stack.pop()
         incident.estado = IncidentStatus.PROCESADA
         order = self._dispatched.get(incident.order_id)
         if order is not None:

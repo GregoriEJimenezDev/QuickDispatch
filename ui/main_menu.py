@@ -1,7 +1,7 @@
 from incidents.incident_service import IncidentService
 from models.enums import IncidentType
 from orders.order_service import OrderService
-from ui.console_utils import centered, freeze_width, read_letters, read_positive_int, read_text
+from ui.console_utils import centered, read_letters, read_positive_int, read_text
 from ui.console_utils import section, show, show_block, title
 
 
@@ -106,8 +106,8 @@ class MainMenu:
             show(centered("No hay pedidos pendientes."))
         else:
             rows = [order.describe() for order in self.order_service.traverse_pending()]
-            nxt = self.order_service.peek_next()
-            rows.append(f"Próximo a despachar: {nxt.describe() if nxt else 'N/A'}")
+            next_order = self.order_service.peek_next()
+            rows.append(f"Próximo a despachar: {next_order.describe() if next_order else 'N/A'}")
             show_block(rows)
         section("B) Pedidos despachados (histórico)")
         show(centered(f"Cantidad: {self.order_service.dispatched_count()}"))
@@ -115,8 +115,8 @@ class MainMenu:
             show(centered("Aún no hay pedidos despachados."))
         else:
             rows = [o.describe() for o in self.order_service.dispatched_orders()]
-            last = self.order_service.last_dispatched()
-            rows.append(f"Último despachado: {last.describe() if last else 'N/A'}")
+            last_order = self.order_service.last_dispatched()
+            rows.append(f"Último despachado: {last_order.describe() if last_order else 'N/A'}")
             show_block(rows)
         section("C) Pila de incidencias pendientes (LIFO)")
         show(centered(f"Cantidad: {self.incident_service.pending_count()}"))
@@ -124,8 +124,8 @@ class MainMenu:
             show(centered("No hay incidencias pendientes."))
         else:
             rows = [i.describe() for i in self.incident_service.traverse_pending()]
-            nxt = self.incident_service.peek_next()
-            rows.append(f"Próxima a tratar: {nxt.describe() if nxt else 'N/A'}")
+            next_incident = self.incident_service.peek_next()
+            rows.append(f"Próxima a tratar: {next_incident.describe() if next_incident else 'N/A'}")
             show_block(rows)
         section("D) Incidencias procesadas (histórico)")
         show(centered(f"Cantidad: {self.incident_service.processed_count()}"))
@@ -133,8 +133,8 @@ class MainMenu:
             show(centered("Aún no hay incidencias procesadas."))
         else:
             rows = [i.describe() for i in self.incident_service.processed_incidents()]
-            last = self.incident_service.last_processed()
-            rows.append(f"Última procesada: {last.describe() if last else 'N/A'}")
+            last_incident = self.incident_service.last_processed()
+            rows.append(f"Última procesada: {last_incident.describe() if last_incident else 'N/A'}")
             show_block(rows)
 
     # O(1): confirmacion S/N y resumen con contadores.
@@ -175,7 +175,6 @@ class MainMenu:
     # O(m): m iteraciones del menu; cada iteracion cuesta como la opcion elegida (max O(n)).
     def run(self) -> None:
         """Repite el menú hasta salir."""
-        freeze_width()
         while self._running:
             self.display()
             choice = read_text("Seleccione una opción (1-6):")

@@ -11,8 +11,8 @@ class QueueLinkedList(LinkedListBase):
     # O(1): inicializa dos referencias y un contador.
     def __init__(self) -> None:
         """Inicia frente, final y contador en vacío."""
-        self._front = None
-        self._rear = None
+        self._front: Optional[Node] = None
+        self._rear: Optional[Node] = None
         self._size = 0
 
     # O(1): compara contador con cero.
@@ -29,21 +29,23 @@ class QueueLinkedList(LinkedListBase):
     def enqueue(self, data: Any) -> None:
         """Agrega un dato al final."""
         node = Node(data)
-        if self.is_empty():
+        rear = self._rear
+        if self.is_empty() or rear is None:
             self._front = node
             self._rear = node
         else:
-            self._rear.next = node
+            rear.next = node
             self._rear = node
         self._size += 1
 
     # O(1): extrae del frente; si queda vacia, rear vuelve a None.
     def dequeue(self) -> Optional[Any]:
         """Saca y devuelve el dato del frente."""
-        if self.is_empty():
+        front = self._front
+        if self.is_empty() or front is None:
             return None
-        data = self._front.data
-        self._front = self._front.next
+        data = front.data
+        self._front = front.next
         self._size -= 1
         if self._front is None:
             self._rear = None
@@ -52,9 +54,10 @@ class QueueLinkedList(LinkedListBase):
     # O(1): lectura del frente sin extraer.
     def peek(self) -> Optional[Any]:
         """Mira el frente sin sacarlo."""
-        if self.is_empty():
+        front = self._front
+        if self.is_empty() or front is None:
             return None
-        return self._front.data
+        return front.data
 
     # O(n): recorre nodo a nodo desde front, sin copiar a lista nativa.
     def traverse_forward(self) -> Iterator[Any]:

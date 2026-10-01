@@ -11,7 +11,7 @@ class StackLinkedList(LinkedListBase):
     # O(1): inicializa una referencia y un contador.
     def __init__(self) -> None:
         """Inicia cima y contador en vacío."""
-        self._top = None
+        self._top: Optional[Node] = None
         self._size = 0
 
     # O(1): compara contador con cero.
@@ -35,19 +35,21 @@ class StackLinkedList(LinkedListBase):
     # O(1): extrae de la cima actualizando top.
     def pop(self) -> Optional[Any]:
         """Saca y devuelve el dato de la cima."""
-        if self.is_empty():
+        top = self._top
+        if self.is_empty() or top is None:
             return None
-        data = self._top.data
-        self._top = self._top.next
+        data = top.data
+        self._top = top.next
         self._size -= 1
         return data
 
     # O(1): lectura de la cima sin extraer.
     def peek(self) -> Optional[Any]:
         """Mira la cima sin sacarla."""
-        if self.is_empty():
+        top = self._top
+        if self.is_empty() or top is None:
             return None
-        return self._top.data
+        return top.data
 
     # O(n): recorre nodo a nodo desde top, sin copiar a lista nativa.
     def traverse_from_top(self) -> Iterator[Any]:

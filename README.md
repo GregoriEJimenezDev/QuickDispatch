@@ -33,4 +33,26 @@ Se atiende primero la más reciente (LIFO): el último reclamo es el más urgent
 Se despacha por orden de llegada (FIFO): el primero registrado es el primero
 despachado. `enqueue`, `dequeue` y `peek` son O(1) con `front` y `rear`.
 
+## Factory y Builder
+
+Viven en `orders/` (`OrderFactory`, `OrderBuilder`) e `incidents/`
+(`IncidentFactory`, `IncidentBuilder`). Se reparten el trabajo: el Builder
+recibe y normaliza la entrada (strip, mayúsculas, alias sin tilde) con setters
+encadenables (`with_nombre`, `with_apellido`, `with_cajas`, `with_tipo`,
+`with_order_id`, `with_motivo`); la Factory valida, emite el ID único
+(`Order-0001`, `Incident-0001`), asigna fecha y estado, e instancia el modelo.
+Los estados y tipos son enums (`OrderStatus`, `IncidentStatus`,
+`IncidentType`) con los mismos textos de siempre.
+
+## Convención de complejidad
+
+Cada método y función lleva un comentario `# O(...)` con su Big-O real:
+
+- O(1) = operaciones sobre campos escalares.
+- O(m) = recorrido de un texto de longitud m.
+- O(n) = recorrido de n nodos o claves de una estructura.
+
+Ningún método supera O(n): los recorridos de cola y pila son simples
+(secuenciales, nunca anidados) y los históricos usan acceso directo por clave.
+
 

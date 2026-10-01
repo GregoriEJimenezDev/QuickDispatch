@@ -1,4 +1,5 @@
 from collections.abc import Iterable, Iterator
+from typing import Optional
 
 from data_structures.queue_linked_list import QueueLinkedList
 from models.enums import OrderStatus
@@ -18,7 +19,7 @@ class OrderService:
         self._queue = queue
         self._dispatched = dispatched
         self._factory = factory
-        self.last_dispatched_order_id = None
+        self.last_dispatched_order_id: str | None = None
 
     # O(m): valida via Builder/Factory (m = longitud del texto) y encola en O(1).
     def register_order(self, nombre: str, apellido: str, cajas: int) -> OperationResult:
@@ -34,9 +35,9 @@ class OrderService:
     # O(1): dequeue + guardado en dict nativo, sin recorridos.
     def dispatch_order(self) -> OperationResult:
         """Despacha el primer pedido de la cola."""
-        if self._queue.is_empty():
+        order: Optional[Order] = self._queue.dequeue()
+        if order is None:
             return OperationResult.failure("No hay pedidos pendientes por despachar.")
-        order: Order = self._queue.dequeue()
         order.estado = OrderStatus.DESPACHADO
         self._dispatched[order.order_id] = order
         self.last_dispatched_order_id = order.order_id

@@ -16,10 +16,15 @@ class OrderFactory:
         self._counter = 0
         self._issued: set[str] = set()
 
-    # O(1): correlativo de instancia; lo registra en el set para no reutilizarlo jamas.
+    # O(1): emite un ID inédito; repite si el candidato ya está en el set.
     def _issue_id(self) -> str:
+        """Emite un ID único que nunca se reutiliza."""
+        """Emite un ID único que nunca se reutiliza."""
         self._counter += 1
         new_id = f"Order-{self._counter:04d}"
+        while new_id in self._issued:
+            self._counter += 1
+            new_id = f"Order-{self._counter:04d}"
         self._issued.add(new_id)
         return new_id
 

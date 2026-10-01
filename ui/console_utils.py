@@ -3,26 +3,13 @@ import shutil
 CONTENT = 64
 
 
-# O(1): ancho de la terminal (congelado al iniciar; 80 si no se detecta).
+# O(1): ancho de la terminal en vivo (80 si no se detecta).
 def term_width() -> int:
-    """Devuelve el ancho de diseño de la sesión."""
-    if _frozen_width is not None:
-        return _frozen_width
+    """Devuelve el ancho actual de la terminal."""
     try:
         return shutil.get_terminal_size().columns
     except Exception:
         return 80
-
-
-_frozen_width = None
-
-
-# O(1): congela el ancho al iniciar para que la sesión no se mueva si se redimensiona.
-def freeze_width() -> None:
-    """Fija el ancho de diseño una sola vez."""
-    global _frozen_width
-    if _frozen_width is None:
-        _frozen_width = term_width()
 
 
 # O(1): espacios a la izquierda para centrar el bloque de contenido.
@@ -95,6 +82,7 @@ def read_positive_int(prompt: str) -> int:
 
 # O(m): verifica solo-letras para re-pedir el dato sin avanzar (m = largo del texto).
 def _letters_ok(text: str) -> bool:
+    """Indica si el texto solo tiene letras."""
     clean = text.strip()
     if not any(c.isalpha() for c in clean):
         return False
