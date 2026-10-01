@@ -31,10 +31,15 @@ def margin() -> int:
     return max(0, (term_width() - column_width()) // 2)
 
 
-# O(n): n = longitud del texto; lo centra dentro del ancho de la columna.
+# O(n): n = longitud del texto; lo ajusta a la columna y centra sus líneas.
 def centered(text: str) -> str:
-    """Centra un texto dentro de la columna."""
-    return " " * margin() + str(text).center(column_width())
+    """Centra un texto en la columna; si excede, lo reparte en varias líneas."""
+    width = column_width()
+    raw = str(text)
+    if len(raw) <= width:
+        return " " * margin() + raw.center(width)
+    parts = textwrap.wrap(raw, width=width, break_on_hyphens=False) or [raw]
+    return "\n".join(" " * margin() + part.center(width) for part in parts)
 
 
 # O(1): repite un carácter con el ancho fijo de la columna (sin entrada variable).
