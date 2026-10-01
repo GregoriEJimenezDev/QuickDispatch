@@ -1,0 +1,3 @@
+# QuickDispatch no requiere dependencias de terceros (solo la biblioteca
+# estándar). Se requiere Python 3.10 o superior por el uso de `X | None`
+# en las anotaciones de tipo.

@@ -28,7 +28,7 @@ class OrderFactory:
         self._issued.add(new_id)
         return new_id
 
-    # O(m): valida campos (barrido de letras sobre el texto, m = su longitud) y emite ID O(1).
+    # O(n): valida los n caracteres de los campos y emite el ID en O(1) con el set.
     def create(self, nombre: str, apellido: str, cajas: int) -> OperationResult:
         """Valida, emite ID y construye el pedido."""
         validation = self.validator.validate_order_fields(nombre, apellido, cajas)

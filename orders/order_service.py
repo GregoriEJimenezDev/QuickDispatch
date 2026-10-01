@@ -21,7 +21,7 @@ class OrderService:
         self._factory = factory
         self.last_dispatched_order_id: str | None = None
 
-    # O(m): valida via Builder/Factory (m = longitud del texto) y encola en O(1).
+    # O(n): la Factory valida los n caracteres de nombre y apellido; encolar es O(1).
     def register_order(self, nombre: str, apellido: str, cajas: int) -> OperationResult:
         """Registra y encola un pedido."""
         builder = OrderBuilder(self._factory)

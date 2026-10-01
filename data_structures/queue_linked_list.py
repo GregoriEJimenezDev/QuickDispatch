@@ -6,7 +6,16 @@ from models.node import Node
 
 
 class QueueLinkedList(LinkedListBase):
-    """Cola FIFO con frente y final."""
+    """Cola FIFO sobre lista enlazada simple para los pedidos.
+
+    FIFO es la estructura adecuada para despachar pedidos porque respeta el
+    orden de llegada: el primero registrado es el primero despachado, igual
+    que en un turno de atención. Por eso la cola solo necesita dos
+    referencias, ``front`` (primer nodo) y ``rear`` (último nodo): insertar
+    al final y extraer del frente cuestan O(1) sin reasignar memoria ni
+    desplazar elementos, como haría una lista nativa que mueve todos los
+    índices en cada inserción.
+    """
 
     # O(1): inicializa dos referencias y un contador.
     def __init__(self) -> None:

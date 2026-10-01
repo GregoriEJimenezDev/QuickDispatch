@@ -15,7 +15,7 @@ class MainMenu:
         self.incident_service = incident_service
         self._running = True
 
-    # O(n): imprime el menu como bloque centrado (n = 6 opciones fijas).
+    # O(n): n = opciones del menú; imprime las n opciones como bloque centrado.
     def display(self) -> None:
         """Muestra las seis opciones del menú."""
         title("QuickDispatch - Menu Principal")
@@ -29,7 +29,7 @@ class MainMenu:
         ], align="block")
         show("")
 
-    # O(m): captura 3 campos y delega al OrderService (m = longitud del texto).
+    # O(n): captura 3 campos y delega al OrderService, que valida los n caracteres.
     def option_register_order(self) -> None:
         """Pide datos y registra el pedido."""
         section("Registrar pedido")
@@ -42,7 +42,7 @@ class MainMenu:
         else:
             show(centered(f"[ERROR] {result.message}"))
 
-    # O(1): despacha un pedido (dequeue + dict), sin recorridos.
+    # O(n): despacha en O(1) y muestra el bloque con n caracteres de salida.
     def option_dispatch_order(self) -> None:
         """Despacha el primer pedido de la cola."""
         section("Despachar pedido")
@@ -56,7 +56,7 @@ class MainMenu:
         else:
             show(centered(f"[ERROR] {result.message}"))
 
-    # O(t): pide el tipo como opcion a/b hasta recibir una valida (t = intentos).
+    # O(n): repite hasta recibir a/b; n = caracteres leídos en cada intento.
     def _ask_tipo(self) -> IncidentType:
         """Pide el tipo como letra a o b."""
         opciones = {"a": IncidentType.DEVOLUCION, "b": IncidentType.CANCELACION}
@@ -67,7 +67,7 @@ class MainMenu:
                 return opciones[choice]
             show(centered("[ERROR] Elija a o b."))
 
-    # O(n): registra incidencia; el costo O(n) viene del anti-duplicado en la pila.
+    # O(n): valida campos, resuelve el pedido y recorre las n incidencias de la pila.
     def option_register_incident(self) -> None:
         """Registra una incidencia con tipo a/b."""
         section("Registrar devolución/cancelación")
@@ -80,7 +80,7 @@ class MainMenu:
         else:
             show(centered(f"[ERROR] {result.message}"))
 
-    # O(1): procesa una incidencia (pop + dict), sin recorridos.
+    # O(n): procesa la cima en O(1) y muestra el bloque con n caracteres de salida.
     def option_process_incident(self) -> None:
         """Procesa la cima de la pila."""
         section("Procesar devolución/cancelación")
@@ -96,7 +96,7 @@ class MainMenu:
         else:
             show(centered(f"[ERROR] {result.message}"))
 
-    # O(n): cuatro recorridos SECUENCIALES (no anidados); cada uno O(n), total O(n).
+    # O(n): cuatro recorridos SECUENCIALES de n elementos (cola, cola, pila, pila).
     def option_show_status(self) -> None:
         """Muestra el reporte completo de estado."""
         title("Reporte de estado")
@@ -141,11 +141,14 @@ class MainMenu:
             rows.append("  " + last_incident.describe() if last_incident else "  N/A")
             show_block(rows)
 
-    # O(1): confirmacion S/N y resumen con contadores.
+    # O(n): lee la respuesta, muestra el resumen de contadores y cierra el menú.
     def option_exit(self) -> None:
-        """Confirma y cierra con el resumen final."""
+        """Confirma la salida con S/N y cierra con el resumen final."""
         answer = read_text("Confirmar salida (S/N)?").upper()
-        if answer != "S":
+        if answer != "S" and answer != "N":
+            show(centered("Respuesta invalida, salida cancelada."))
+            return
+        if answer == "N":
             show(centered("Salida cancelada."))
             return
         section("Resumen final")
@@ -159,7 +162,7 @@ class MainMenu:
         show(centered("Cierre sin excepciones. Hasta luego!"))
         self._running = False
 
-    # O(n): despacha por diccionario; la opcion elegida puede costar O(n).
+    # O(n): lookup O(1) en el dict; la opción elegida puede recorrer n elementos.
     def handle_choice(self, choice: str) -> None:
         """Ejecuta la opción elegida del menú."""
         actions = {
@@ -176,10 +179,15 @@ class MainMenu:
             return
         action()
 
-    # O(m): m iteraciones del menu; cada iteracion cuesta como la opcion elegida (max O(n)).
+    # O(n): itera hasta salir; cada iteración puede costar O(n) sobre n elementos.
     def run(self) -> None:
-        """Repite el menú hasta salir."""
-        while self._running:
-            self.display()
-            choice = read_text("Seleccione una opción (1-6):")
-            self.handle_choice(choice)
+        """Repite el menú hasta salir; Ctrl+C y EOF cierran sin traceback."""
+        try:
+            while self._running:
+                self.display()
+                choice = read_text("Seleccione una opción (1-6):")
+                self.handle_choice(choice)
+        except (EOFError, KeyboardInterrupt):
+            show("")
+            show(centered("Ejecucion interrumpida. Hasta luego!"))
+            self._running = False

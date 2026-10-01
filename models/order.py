@@ -24,7 +24,7 @@ class Order:
         self.fecha_hora = fecha_hora
         self.estado = estado
 
-    # O(1): construye una cadena con atributos escalares.
+    # O(n): n = longitud de nombre y apellido; concatena sus n caracteres en una línea.
     def describe(self) -> str:
         """Resume el pedido en una línea."""
         return (

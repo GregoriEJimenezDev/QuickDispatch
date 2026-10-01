@@ -13,13 +13,13 @@ class OrderBuilder:
         self._apellido = ""
         self._cajas = 0
 
-    # O(m): guarda el nombre recortado (m = longitud del texto).
+    # O(n): recorta los n caracteres del nombre y los guarda.
     def with_nombre(self, nombre: str) -> "OrderBuilder":
         """Normaliza y guarda el nombre."""
         self._nombre = nombre.strip() if isinstance(nombre, str) else nombre
         return self
 
-    # O(m): guarda el apellido recortado (m = longitud del texto).
+    # O(n): recorta los n caracteres del apellido y los guarda.
     def with_apellido(self, apellido: str) -> "OrderBuilder":
         """Normaliza y guarda el apellido."""
         self._apellido = apellido.strip() if isinstance(apellido, str) else apellido
@@ -31,7 +31,7 @@ class OrderBuilder:
         self._cajas = cajas
         return self
 
-    # O(m): delega en la Factory (hereda su costo sobre el texto, m = su longitud).
+    # O(n): la Factory recorre los n caracteres de nombre y apellido al validar.
     def build(self) -> OperationResult:
         """Crea el pedido mediante la Factory."""
         return self._factory.create(self._nombre, self._apellido, self._cajas)

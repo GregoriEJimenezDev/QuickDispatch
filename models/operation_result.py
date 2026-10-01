@@ -11,7 +11,7 @@ class OperationResult:
         self.data = data
         self.message = message
 
-    # O(1): formateo de una linea.
+    # O(n): n = longitud del mensaje; formatea el resultado en una sola línea.
     def __repr__(self) -> str:
         """Muestra el resultado en una línea."""
         return f"OperationResult(ok={self.ok}, message={self.message!r})"

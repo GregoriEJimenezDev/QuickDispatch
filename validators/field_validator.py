@@ -3,7 +3,7 @@ from typing import Any, Optional
 from models.operation_result import OperationResult
 
 
-# O(1): validacion escalar de texto no vacio.
+# O(n): n = longitud del texto; recorta sus extremos para detectar el vacío.
 def rule_required(value: Any, field_name: str) -> Optional[str]:
     """Exige texto no vacío."""
     if value is None:
@@ -23,7 +23,7 @@ def rule_positive_int(value: Any, field_name: str) -> Optional[str]:
     return None
 
 
-# O(1): validacion escalar contra un conjunto fijo de opciones.
+# O(n): n = opciones de la lista; recorre la tupla y arma el mensaje de error.
 def rule_choice(value: Any, field_name: str, choices: tuple[str, ...]) -> Optional[str]:
     """Exige un valor de la lista permitida."""
     if value not in choices:
@@ -31,7 +31,7 @@ def rule_choice(value: Any, field_name: str, choices: tuple[str, ...]) -> Option
     return None
 
 
-# O(m): solo letras unicode (acepta tildes y enie), espacios, guiones y apostrofes.
+# O(n): n = longitud del texto; acepta letras unicode, espacios, guiones y apóstrofes.
 def rule_letters_only(value: Any, field_name: str) -> Optional[str]:
     """Exige solo letras y signos básicos."""
     text = value.strip() if isinstance(value, str) else ""
@@ -46,12 +46,12 @@ def rule_letters_only(value: Any, field_name: str) -> Optional[str]:
 class FieldValidator:
     """Valida campos con reglas inyectables."""
 
-    # O(1): guarda referencias a reglas inyectadas.
+    # O(n): n = reglas extra; copia sus referencias en la lista interna.
     def __init__(self, extra_rules: list | None = None) -> None:
         """Guarda las reglas extra recibidas."""
         self.extra_rules = list(extra_rules) if extra_rules else []
 
-    # O(k + m): reglas extra (k) + barrido de letras sobre el texto (m, su longitud).
+    # O(n): n = longitud de los textos; valida cada campo y aplica las reglas extra.
     def validate_order_fields(self, nombre: str, apellido: str, cajas: int) -> OperationResult:
         """Valida nombre, apellido y cajas."""
         error = rule_required(nombre, "Nombre")
@@ -75,7 +75,7 @@ class FieldValidator:
                 return OperationResult.failure(error)
         return OperationResult.success(message="Campos de pedido validos.")
 
-    # O(k): recorre las k reglas extra inyectadas (k acotado, no depende de n).
+    # O(n): n = longitud de los textos; valida tipo, pedido y motivo y sus reglas extra.
     def validate_incident_fields(self, tipo: str, order_id: str, motivo: str,
                                  tipos_validos: tuple[str, ...]) -> OperationResult:
         """Valida tipo, pedido y motivo."""

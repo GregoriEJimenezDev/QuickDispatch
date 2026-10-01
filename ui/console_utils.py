@@ -31,25 +31,25 @@ def margin() -> int:
     return max(0, (term_width() - column_width()) // 2)
 
 
-# O(1): centra un texto DENTRO de la columna de contenido.
+# O(n): n = longitud del texto; lo centra dentro del ancho de la columna.
 def centered(text: str) -> str:
     """Centra un texto dentro de la columna."""
     return " " * margin() + str(text).center(column_width())
 
 
-# O(1): linea horizontal del ancho de la columna.
+# O(1): repite un carácter con el ancho fijo de la columna (sin entrada variable).
 def line(char: str = "=") -> str:
     """Crea una línea horizontal de la columna."""
     return " " * margin() + char * column_width()
 
 
-# O(1): imprime una linea tal cual.
+# O(n): n = longitud del mensaje; escribe sus n caracteres en consola.
 def show(message: str = "") -> None:
     """Imprime una línea en consola."""
     print(str(message))
 
 
-# O(1): titulo centrado.
+# O(n): n = longitud del título; lo centra e imprime entre dos líneas.
 def title(text: str) -> None:
     """Imprime un título centrado entre líneas."""
     show("")
@@ -58,7 +58,7 @@ def title(text: str) -> None:
     show(line("="))
 
 
-# O(1): subtitulo centrado entre guiones.
+# O(n): n = longitud del subtítulo; lo centra e imprime entre guiones.
 def section(text: str) -> None:
     """Imprime un subtítulo centrado."""
     show("")
@@ -88,7 +88,7 @@ def _wrap_line(text: str, width: int) -> list[str]:
     return [out[0]] + ["  " + part for part in out[1:]]
 
 
-# O(m): ajusta e imprime las líneas (m = caracteres totales del bloque).
+# O(n): n = caracteres totales del bloque; ajusta e imprime sus n caracteres.
 def show_block(lines: list[str], align: str = "left") -> None:
     """Imprime líneas ajustadas dentro de la columna."""
     width = column_width()
@@ -108,7 +108,7 @@ def show_block(lines: list[str], align: str = "left") -> None:
             show(pad + part)
 
 
-# O(1): lee una linea y la devuelve sin espacios externos.
+# O(n): n = longitud de la línea leída; la recorta y la devuelve sin espacios.
 def read_text(prompt: str) -> str:
     """Lee texto recortado desde consola."""
     text = input(" " * margin() + "  " + prompt + " ").strip()
@@ -116,7 +116,7 @@ def read_text(prompt: str) -> str:
     return text
 
 
-# O(m) por intento: valida largo <= 9 ANTES de int() y re-pide (m = largo del texto).
+# O(n) por intento: n = longitud del texto; valida largo <= 9 ANTES de int().
 def read_positive_int(prompt: str) -> int:
     """Lee un entero mayor que 0 de hasta 9 dígitos, repitiendo si hace falta."""
     base = " " * margin() + "  " + prompt + " "
@@ -128,7 +128,7 @@ def read_positive_int(prompt: str) -> int:
         show(centered("[ERROR] Solo se permiten números enteros mayores que 0."))
 
 
-# O(m): verifica solo-letras para re-pedir el dato sin avanzar (m = largo del texto).
+# O(n): n = longitud del texto; recorre sus n caracteres buscando solo letras.
 def _letters_ok(text: str) -> bool:
     """Indica si el texto solo tiene letras."""
     clean = text.strip()
@@ -137,7 +137,7 @@ def _letters_ok(text: str) -> bool:
     return all(c.isalpha() or c in " -'" for c in clean)
 
 
-# O(m) por intento: re-pide por consola hasta recibir solo letras (m = largo del texto).
+# O(n) por intento: n = longitud del texto; repite hasta recibir solo letras.
 def read_letters(prompt: str) -> str:
     """Lee solo letras, repitiendo si hace falta."""
     base = " " * margin() + "  " + prompt + " "

@@ -19,7 +19,7 @@ class Incident:
         self.fecha_hora = fecha_hora
         self.estado = estado
 
-    # O(1): construye una cadena con atributos escalares.
+    # O(n): n = longitud del motivo; concatena los datos de la incidencia en una línea.
     def describe(self) -> str:
         """Resume la incidencia en una línea."""
         return (

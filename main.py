@@ -9,7 +9,6 @@ from incidents.incident_factory import IncidentFactory
 from incidents.incident_service import IncidentService
 from orders.order_factory import OrderFactory
 from orders.order_service import OrderService
-from ui.console_utils import centered, show
 from ui.main_menu import MainMenu
 from validators.field_validator import FieldValidator
 
@@ -28,15 +27,10 @@ def build_app() -> MainMenu:
     return MainMenu(order_service, incident_service)
 
 
-# O(m): ejecuta el menu hasta salir; EOF o Ctrl+C cierran limpio, sin traceback.
+# O(n): ejecuta el menú; cada iteración puede costar O(n) sobre n elementos.
 def main() -> None:
-    """Arranca la app con cierre limpio ante EOF o Ctrl+C."""
-    menu = build_app()
-    try:
-        menu.run()
-    except (EOFError, KeyboardInterrupt):
-        show("")
-        show(centered("Sesión terminada por el usuario. Cierre limpio. Hasta luego!"))
+    """Arranca la app; el menú termina sin traceback ante Ctrl+C o EOF."""
+    build_app().run()
 
 
 if __name__ == "__main__":

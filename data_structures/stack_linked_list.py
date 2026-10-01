@@ -6,7 +6,15 @@ from models.node import Node
 
 
 class StackLinkedList(LinkedListBase):
-    """Pila LIFO con cima."""
+    """Pila LIFO sobre lista enlazada simple para las incidencias.
+
+    LIFO es la estructura adecuada para procesar incidencias porque atiende
+    primero lo más reciente: el último reclamo es el más urgente, por eso el
+    último en entrar es el primero en salir. Con una sola referencia,
+    ``top`` (cima), ``push`` y ``pop`` cuestan O(1) sobre la lista enlazada
+    simple: se enlaza o se desenlaza el primer nodo sin reasignar memoria
+    ni recorrer la estructura.
+    """
 
     # O(1): inicializa una referencia y un contador.
     def __init__(self) -> None:

@@ -25,16 +25,50 @@ terminal con un mínimo de 40); conviene maximizar o ajustar la ventana antes de
 - `orders/` e `incidents/`: factories, builders y servicios de cada flujo.
 - `validators/`: reglas de validación inyectables.
 - `ui/`: utilidades de consola y menú principal de 6 opciones.
+- `requirements.txt`: nota de versión mínima de Python (sin dependencias).
 
-## Por qué pila para incidencias
+## Complejidades por operación
 
-Se atiende primero la más reciente (LIFO): el último reclamo es el más urgente.
-`push`, `pop` y `peek` son O(1) sobre `top`, sin recorrer nodos.
+Cola FIFO (`QueueLinkedList`):
 
-## Por qué cola para pedidos
+| Operación | Complejidad | Por qué |
+| --- | --- | --- |
+| `enqueue(dato)` | O(1) | enlaza el nodo nuevo en `rear` y fija `front` si estaba vacía |
+| `dequeue()` | O(1) | extrae el nodo de `front` y avanza la referencia |
+| `peek()` | O(1) | lee `front` sin extraer |
+| `is_empty()` / `len()` | O(1) | contador incremental `_size` |
+| `traverse_forward()` | O(n) | recorre los n nodos desde `front`, sin copiarlos |
 
-Se despacha por orden de llegada (FIFO): el primero registrado es el primero
-despachado. `enqueue`, `dequeue` y `peek` son O(1) con `front` y `rear`.
+Pila LIFO (`StackLinkedList`):
+
+| Operación | Complejidad | Por qué |
+| --- | --- | --- |
+| `push(dato)` | O(1) | enlaza el nodo nuevo como `top` |
+| `pop()` | O(1) | extrae el nodo de `top` y avanza la referencia |
+| `peek()` | O(1) | lee `top` sin extraer |
+| `is_empty()` / `len()` | O(1) | contador incremental `_size` |
+| `traverse_from_top()` | O(n) | recorre los n nodos desde `top`, sin copiarlos |
+
+Ninguna operación supera O(n) y ningún recorrido está anidado con otro.
+
+## Justificación de estructuras de datos
+
+**Queue (cola) para pedidos.** Se despacha por orden de llegada (FIFO): el
+primero registrado es el primero despachado, que es la regla de negocio de
+reparto. Con `front` y `rear`, `enqueue`, `dequeue` y `peek` son O(1) y no
+dependen del tamaño de la cola.
+
+**Stack (pila) para incidencias.** Se atiende primero la más reciente (LIFO):
+el último reclamo es el más urgente y debe resolverse antes que los
+anteriores. Con `top`, `push`, `pop` y `peek` son O(1) sin recorrer nodos.
+
+**Por qué lista enlazada simple.** Insertar y extraer en cualquier extremo
+cuesta O(1) con dos referencias (`front`/`rear`) o una (`top`): solo se
+enlaza o desenlaza el nodo afectado y se actualiza el contador, sin
+reasignar memoria de un bloque contiguo ni desplazar elementos como haría
+una lista nativa al insertar al inicio. Los históricos de pedidos
+despachados e incidencias procesadas usan acceso directo por clave en
+diccionarios nativos.
 
 ## Factory y Builder
 
@@ -49,13 +83,11 @@ Los estados y tipos son enums (`OrderStatus`, `IncidentStatus`,
 
 ## Convención de complejidad
 
-Cada método y función lleva un comentario `# O(...)` con su Big-O real:
+Cada método y función lleva un comentario `# O(...)` con su Big-O real,
+justo encima de su `def`, y siempre usa `n` como variable:
 
 - O(1) = operaciones sobre campos escalares.
-- O(m) = recorrido de un texto de longitud m.
-- O(n) = recorrido de n nodos o claves de una estructura.
+- O(n) = recorrido de n caracteres de texto o de n nodos o claves.
 
 Ningún método supera O(n): los recorridos de cola y pila son simples
 (secuenciales, nunca anidados) y los históricos usan acceso directo por clave.
-
-

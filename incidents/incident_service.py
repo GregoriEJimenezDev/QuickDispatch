@@ -1,4 +1,3 @@
-import re
 from collections.abc import Iterable, Iterator
 from typing import Optional
 
@@ -8,9 +7,7 @@ from incidents.incident_factory import IncidentFactory
 from models.enums import IncidentStatus, IncidentType, OrderStatus
 from models.incident import Incident
 from models.operation_result import OperationResult
-
-
-_ORDER_ID_RE = re.compile(r"^(?:ORDER-)?(\d+)$", re.IGNORECASE)
+from validators.field_validator import rule_required
 
 
 class IncidentService:
@@ -26,7 +23,7 @@ class IncidentService:
         self._factory = factory
         self.last_processed_incident_id: str | None = None
 
-    # O(n): un solo recorrido de la pila para detectar duplicado pendiente (sin nativas).
+    # O(n): n = incidencias de la pila; recorre desde la cima hasta dar con el pedido.
     def _has_pending_for_order(self, order_id: str) -> bool:
         """Indica si el pedido ya tiene una incidencia pendiente."""
         for incident in self._stack.traverse_from_top():
@@ -34,20 +31,21 @@ class IncidentService:
                 return True
         return False
 
-    # O(m): normaliza ("1"/"0001"/"Order-0001" -> "Order-0001"; None si es invalido).
+    # O(n): n = longitud del Order ID; recorre el texto validando prefijo y dígitos.
     def _normalize_order_input(self, order_id: str) -> str | None:
-        """Normaliza el Order ID a formato Order-NNNN o devuelve None."""
+        """Acepta 'Order-0001', 'order-1', '0001' o '1'; el resto vuelve igual."""
         if not isinstance(order_id, str):
             return None
-        match = _ORDER_ID_RE.match(order_id.strip())
-        if match is None:
-            return None
+        text = order_id.strip()
+        digits = text[6:] if text.lower().startswith("order-") else text
+        if not digits.isdecimal():
+            return order_id
         try:
-            return f"Order-{int(match.group(1)):04d}"
+            return f"Order-{int(digits):04d}"
         except ValueError:
-            return None
+            return order_id
 
-    # O(n): clave canonica del pedido (exacta O(1); barrido O(n) si varia mayusculas).
+    # O(n): n = claves del histórico; consulta exacta O(1) y barrido de las n claves.
     def _resolve_order_key(self, order_id: str) -> str | None:
         """Busca la clave canónica del pedido en despachados."""
         cleaned = self._normalize_order_input(order_id)
@@ -60,9 +58,18 @@ class IncidentService:
                     return key
         return cleaned
 
-    # O(n): pre-chequeos ANTES de consumir ID (evita huecos); la Factory valida y consume.
+    # O(n): valida 3 campos, resuelve el pedido y recorre las n incidencias de la pila.
     def register_incident(self, tipo: str, order_id: str, motivo: str) -> OperationResult:
-        """Registra una incidencia en la pila."""
+        """Registra una incidencia en la pila sin consumir IDs si falla."""
+        error = rule_required(tipo, "Tipo")
+        if error:
+            return OperationResult.failure(error)
+        error = rule_required(order_id, "Order ID")
+        if error:
+            return OperationResult.failure(error)
+        error = rule_required(motivo, "Motivo")
+        if error:
+            return OperationResult.failure(error)
         key = self._resolve_order_key(order_id)
         order = self._dispatched.get(key) if key is not None else None
         if order is None:
@@ -73,6 +80,11 @@ class IncidentService:
         if order.is_closed():
             return OperationResult.failure(
                 f"Pedido {order.order_id} está CERRADO; no admite incidencias."
+            )
+        if order.estado != OrderStatus.DESPACHADO:
+            return OperationResult.failure(
+                f"Pedido {order.order_id} no está DESPACHADO; "
+                f"estado actual: {order.estado}."
             )
         if self._has_pending_for_order(order.order_id):
             return OperationResult.failure(

@@ -28,7 +28,7 @@ class IncidentFactory:
         self._issued.add(new_id)
         return new_id
 
-    # O(m): valida textos (m = su longitud) y emite ID O(1).
+    # O(n): valida los n caracteres de tipo, Order ID y motivo; ID en O(1) con el set.
     def create(self, tipo: str, order_id: str, motivo: str) -> OperationResult:
         """Valida, emite ID y construye la incidencia."""
         validation = self.validator.validate_incident_fields(
