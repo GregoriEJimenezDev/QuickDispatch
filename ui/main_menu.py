@@ -26,7 +26,7 @@ class MainMenu:
             "4. Procesar devolución/cancelación",
             "5. Ver estado (reporte completo)",
             "6. Salir",
-        ])
+        ], align="block")
         show("")
 
     # O(m): captura 3 campos y delega al OrderService (m = longitud del texto).
@@ -72,7 +72,7 @@ class MainMenu:
         """Registra una incidencia con tipo a/b."""
         section("Registrar devolución/cancelación")
         tipo = self._ask_tipo()
-        order_id = read_text("Order ID (ej. Order-0001 o 0001):")
+        order_id = read_text("Order ID (ej. Order-0001 o 1):")
         motivo = read_text("Motivo:")
         result = self.incident_service.register_incident(tipo, order_id, motivo)
         if result.ok:
@@ -107,7 +107,8 @@ class MainMenu:
         else:
             rows = [order.describe() for order in self.order_service.traverse_pending()]
             next_order = self.order_service.peek_next()
-            rows.append(f"Próximo a despachar: {next_order.describe() if next_order else 'N/A'}")
+            rows.append("Próximo a despachar:")
+            rows.append("  " + next_order.describe() if next_order else "  N/A")
             show_block(rows)
         section("B) Pedidos despachados (histórico)")
         show(centered(f"Cantidad: {self.order_service.dispatched_count()}"))
@@ -116,7 +117,8 @@ class MainMenu:
         else:
             rows = [o.describe() for o in self.order_service.dispatched_orders()]
             last_order = self.order_service.last_dispatched()
-            rows.append(f"Último despachado: {last_order.describe() if last_order else 'N/A'}")
+            rows.append("Último despachado:")
+            rows.append("  " + last_order.describe() if last_order else "  N/A")
             show_block(rows)
         section("C) Pila de incidencias pendientes (LIFO)")
         show(centered(f"Cantidad: {self.incident_service.pending_count()}"))
@@ -125,7 +127,8 @@ class MainMenu:
         else:
             rows = [i.describe() for i in self.incident_service.traverse_pending()]
             next_incident = self.incident_service.peek_next()
-            rows.append(f"Próxima a tratar: {next_incident.describe() if next_incident else 'N/A'}")
+            rows.append("Próxima a tratar:")
+            rows.append("  " + next_incident.describe() if next_incident else "  N/A")
             show_block(rows)
         section("D) Incidencias procesadas (histórico)")
         show(centered(f"Cantidad: {self.incident_service.processed_count()}"))
@@ -134,7 +137,8 @@ class MainMenu:
         else:
             rows = [i.describe() for i in self.incident_service.processed_incidents()]
             last_incident = self.incident_service.last_processed()
-            rows.append(f"Última procesada: {last_incident.describe() if last_incident else 'N/A'}")
+            rows.append("Última procesada:")
+            rows.append("  " + last_incident.describe() if last_incident else "  N/A")
             show_block(rows)
 
     # O(1): confirmacion S/N y resumen con contadores.

@@ -13,6 +13,9 @@ python main.py
 
 Requiere Python 3.10 o superior (se usa `X | None` en anotaciones).
 
+La interfaz usa una columna centrada de 100 caracteres (se adapta al ancho de la
+terminal con un mínimo de 40); conviene maximizar o ajustar la ventana antes de ejecutar.
+
 ## Estructura de carpetas
 
 - `main.py`: composición de dependencias (`build_app`) y entrada (`main`).

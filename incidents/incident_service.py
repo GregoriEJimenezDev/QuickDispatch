@@ -34,7 +34,7 @@ class IncidentService:
                 return True
         return False
 
-    # O(m): normaliza ("1"/"0001"/"Order-0001" -> "Order-0001"; None si formato invalido).
+    # O(m): normaliza ("1"/"0001"/"Order-0001" -> "Order-0001"; None si es invalido).
     def _normalize_order_input(self, order_id: str) -> str | None:
         """Normaliza el Order ID a formato Order-NNNN o devuelve None."""
         if not isinstance(order_id, str):
